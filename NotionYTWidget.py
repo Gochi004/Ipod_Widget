@@ -3,7 +3,7 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-# 📻 Last.fm credentials
+# Last.fm credentials
 API_KEY = "7c6d303ef29f29d821dfacd2552defa0"
 API_SECRET = "d95baa4faec4630ea6ec0226ce807916"
 USERNAME = "U773R1Y1NS4N3"
