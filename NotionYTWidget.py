@@ -129,13 +129,13 @@ if recent_tracks:
                         root.insert(i, image_elem)
                     break
         else:
-            safe_print("No se pudo descargar la carátula.")
+            print("No se pudo descargar la carátula.")
     except Exception as e:
-        safe_print(f"Error al obtener la imagen: {e}")
+        print(f"Error al obtener la imagen: {e}")
 
     # Guardar SVG
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
-    safe_print(f"SVG actualizado con: {text_content}")
+    print(f"SVG actualizado con: {text_content}")
 
     # Crear index.html con Google Fonts y cache busting
     version = datetime.now().strftime("%Y%m%d%H%M")
@@ -172,7 +172,7 @@ if recent_tracks:
 """
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    safe_print(f"index.html generado con versión: {version}")
+    print(f"index.html generado con versión: {version}")
 
 else:
     print("No hay scrobbles recientes.")
