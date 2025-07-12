@@ -3,19 +3,12 @@ import requests
 import xml.etree.ElementTree as ET
 import base64
 from datetime import datetime
+import config_local
 
-# Función para imprimir sin fallar por codificación
-def safe_print(message):
-    try:
-        print(message)
-    except UnicodeEncodeError:
-        print(message.encode('utf-8', 'replace').decode('utf-8'))
-
-# Configuración de la API
-API_KEY = "7c6d303ef29f29d821dfacd2552defa0"
-API_SECRET = "d95baa4faec4630ea6ec0226ce807916"
-USERNAME = "U773R1Y1NS4N3"
-PASSWORD_HASH = pylast.md5("Julio411#")
+API_KEY = config_local.API_KEY
+API_SECRET = config_local.API_SECRET
+USERNAME = config_local.USERNAME
+PASSWORD_HASH = config_local.PASSWORD_HASH
 
 DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # Imagen por defecto
 
