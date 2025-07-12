@@ -2,27 +2,31 @@ import pylast
 import requests
 import xml.etree.ElementTree as ET
 import base64
-import sys
 from datetime import datetime
 
+# Función para imprimir sin fallar por codificación
+def safe_print(message):
+    try:
+        print(message)
+    except UnicodeEncodeError:
+        print(message.encode('utf-8', 'replace').decode('utf-8'))
 
-sys.stdout.reconfigure(encoding='utf-8')
-
-# 🔑 Last.fm API config
+# Configuración de la API
 API_KEY = "7c6d303ef29f29d821dfacd2552defa0"
 API_SECRET = "d95baa4faec4630ea6ec0226ce807916"
 USERNAME = "U773R1Y1NS4N3"
 PASSWORD_HASH = pylast.md5("Julio411#")
 
-DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # Imagen por defecto si falla el cover
+DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # Imagen por defecto
 
-# 🌐 Namespaces
+# Namespaces SVG
 ET.register_namespace('', "http://www.w3.org/2000/svg")
 ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 ET.register_namespace('html', "http://www.w3.org/1999/xhtml")
 ns_svg = "http://www.w3.org/2000/svg"
 ns_xlink = "http://www.w3.org/1999/xlink"
 
+# Conexión a Last.fm
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=USERNAME, password_hash=PASSWORD_HASH)
 recent_tracks = network.get_user(USERNAME).get_recent_tracks(limit=1)
@@ -35,7 +39,7 @@ if recent_tracks:
     album_name = track_info.album
     image_url = None
 
-    # 🧠 Obtener carátula robustamente
+    # Buscar carátula
     album = track.get_album()
     if album:
         try:
@@ -53,7 +57,7 @@ if recent_tracks:
     if not image_url:
         image_url = DEFAULT_COVER
 
-    # 🎨 Cargar y editar SVG base
+    # Procesar SVG base
     tree = ET.parse("ipodbase.svg")
     root = tree.getroot()
     root.attrib["width"] = "641"
@@ -82,7 +86,7 @@ if recent_tracks:
     defs.append(clip_path)
     root.insert(0, defs)
 
-    # 📝 Texto con animación scroll
+    # Texto animado
     base_speed = 0.35
     text_content = f"{title} - by {artist}"
     text_length = len(text_content)
@@ -110,7 +114,7 @@ if recent_tracks:
     scroll_text.append(animate_elem)
     root.append(scroll_text)
 
-    # 🖼️ Insertar carátula embebida
+    # Insertar carátula
     try:
         response = requests.get(image_url)
         if response.status_code == 200:
@@ -132,15 +136,15 @@ if recent_tracks:
                         root.insert(i, image_elem)
                     break
         else:
-            print("⚠️ No se pudo descargar el cover.")
+            safe_print("No se pudo descargar la carátula.")
     except Exception as e:
-        print("❌ Error al obtener la imagen:", e)
+        safe_print(f"Error al obtener la imagen: {e}")
 
-    # 💾 Guardar SVG actualizado
+    # Guardar SVG
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
-    print("✅ SVG actualizado con el último scrobble")
+    safe_print(f"SVG actualizado con: {text_content}")
 
-    # 🧾 Generar index.html con versionado dinámico
+    # Crear index.html con Google Fonts y cache busting
     version = datetime.now().strftime("%Y%m%d%H%M")
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
@@ -150,6 +154,7 @@ if recent_tracks:
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   <meta http-equiv="pragma" content="no-cache">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <style>
     body {{
       background-color: #0f0f0f;
@@ -158,6 +163,7 @@ if recent_tracks:
       align-items: center;
       justify-content: center;
       height: 100vh;
+      font-family: 'Noto Sans JP', sans-serif;
     }}
     object {{
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
@@ -173,7 +179,8 @@ if recent_tracks:
 """
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    print("📝 index.html generado con versión:", version)
+    safe_print(f"index.html generado con versión: {version}")
 
 else:
-    print("⛔ No hay scrobbles recientes.")
+    print("No hay scrobbles recientes.")
+
