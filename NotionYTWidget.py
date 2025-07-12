@@ -2,7 +2,11 @@ import pylast
 import requests
 import xml.etree.ElementTree as ET
 import base64
+import sys
 from datetime import datetime
+
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 # 🔑 Last.fm API config
 API_KEY = "7c6d303ef29f29d821dfacd2552defa0"
