@@ -28,6 +28,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pylast
 
+      - name: Crear archivo .nojekyll
+        run: touch .nojekyll
+
       - name: Ejecutar script
         run: python NotionYTWidget.py
 
