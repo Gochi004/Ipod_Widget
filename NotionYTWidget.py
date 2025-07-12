@@ -29,9 +29,9 @@ if recent_tracks:
     tree = ET.parse("ipodbase.svg")
     root = tree.getroot()
 
-    root.attrib["width"] = "700"
-    root.attrib["height"] = "800"
-    root.attrib["viewBox"] = "0 0 700 800"
+    root.attrib["width"] = "641"
+    root.attrib["height"] = "292"
+    root.attrib["viewBox"] = "0 0 641 292"
 
     def remove_element(target, root):
         for parent in root.iter():
