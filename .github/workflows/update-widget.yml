@@ -8,6 +8,8 @@ jobs:
   update:
     runs-on: ubuntu-latest
     env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: 1
     steps:
