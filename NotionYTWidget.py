@@ -129,6 +129,7 @@ if recent_tracks:
     except Exception as e:
         print(f"Error al obtener la imagen: {e}")
 
+if recent_tracks:
     # Guardar SVG actualizado
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
     print(f"SVG actualizado con: {text_content}")
