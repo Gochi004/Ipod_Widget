@@ -129,13 +129,13 @@ if recent_tracks:
     except Exception as e:
         print(f"Error al obtener la imagen: {e}")
 
-    # Guardar SVG
+    # Guardar SVG actualizado
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
     print(f"SVG actualizado con: {text_content}")
 
-    # Crear index.html con Google Fonts y auto-reload si cambia versión
-version = datetime.now().strftime("%Y%m%d%H%M")
-html_content = f"""<!DOCTYPE html>
+    # Crear index.html con cache busting y auto-reload
+    version = datetime.now().strftime("%Y%m%d%H%M")
+    html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -175,4 +175,3 @@ html_content = f"""<!DOCTYPE html>
 
 else:
     print("No hay scrobbles recientes.")
-
