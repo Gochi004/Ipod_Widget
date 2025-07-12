@@ -9,8 +9,7 @@ API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
 USERNAME = os.getenv("USERNAME")
 PASSWORD_HASH = pylast.md5(os.getenv("PASSWORD"))
-
-DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # Imagen por defecto
+DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"
 
 # Namespaces SVG
 ET.register_namespace('', "http://www.w3.org/2000/svg")
@@ -39,14 +38,12 @@ if recent_tracks:
             image_url = album.get_cover_image(size=pylast.SIZE_LARGE)
         except:
             pass
-
     if not image_url and album_name:
         try:
             album_obj = network.get_album(artist, album_name)
             image_url = album_obj.get_cover_image(size=pylast.SIZE_LARGE)
         except:
             pass
-
     if not image_url:
         image_url = DEFAULT_COVER
 
@@ -82,8 +79,7 @@ if recent_tracks:
     # Texto animado
     base_speed = 0.35
     text_content = f"{title} - by {artist}"
-    text_length = len(text_content)
-    animation_duration = max(6, min(round(text_length * base_speed, 1), 30))
+    animation_duration = max(6, min(round(len(text_content) * base_speed, 1), 30))
 
     scroll_text = ET.Element(f"{{{ns_svg}}}text", {
         "x": "340", "y": "63",
@@ -137,7 +133,7 @@ if recent_tracks:
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
     print(f"SVG actualizado con: {text_content}")
 
-    # Crear index.html con Google Fonts y cache busting
+    # Crear index.html con Google Fonts y auto-reload si cambia versión
     version = datetime.now().strftime("%Y%m%d%H%M")
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
@@ -163,6 +159,21 @@ if recent_tracks:
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }}
   </style>
+  <script>
+    let lastVersion = null;
+
+    async function checkForUpdate() {{
+      const res = await fetch('version.txt?_=' + new Date().getTime());
+      const newVersion = await res.text();
+
+      if (lastVersion && newVersion.trim() !== lastVersion.trim()) {{
+        window.location.reload(true);
+      }}
+      lastVersion = newVersion.trim();
+    }}
+
+    setInterval(checkForUpdate, 30000);
+  </script>
 </head>
 <body>
   <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}" width="641" height="292">
@@ -174,6 +185,9 @@ if recent_tracks:
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"index.html generado con versión: {version}")
+
+    with open("version.txt", "w", encoding="utf-8") as vf:
+        vf.write(version)
 
 else:
     print("No hay scrobbles recientes.")
