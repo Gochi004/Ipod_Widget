@@ -7,6 +7,9 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: 1
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -26,7 +29,6 @@ jobs:
         run: |
           git config user.name "Auto Updater"
           git config user.email "bot@example.com"
-          git add ipodbase_updated.svg
+          git add ipodbase_updated.svg index.html
           git commit -m "Update SVG with latest scrobble"
           git push
-
