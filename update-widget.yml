@@ -1,0 +1,31 @@
+name: Update SVG Widget
+
+on:
+  repository_dispatch:
+    types: [new_scrobble]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pylast requests
+
+      - name: Run SVG generator
+        run: python NotionYTWidget.py
+
+      - name: Commit and push updated SVG
+        run: |
+          git config user.name "Auto Updater"
+          git config user.email "bot@example.com"
+          git add ipodbase_updated.svg
+          git commit -m "Update SVG with latest scrobble"
+          git push
