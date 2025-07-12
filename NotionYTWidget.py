@@ -2,6 +2,7 @@ import pylast
 import requests
 import xml.etree.ElementTree as ET
 import base64
+import os
 from datetime import datetime
 
 API_KEY = os.getenv("API_KEY")
