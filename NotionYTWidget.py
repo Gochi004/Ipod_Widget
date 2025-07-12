@@ -5,6 +5,9 @@ import base64
 from datetime import datetime
 import config_local
 
+local_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(local_path)
+
 API_KEY = config_local.API_KEY
 API_SECRET = config_local.API_SECRET
 USERNAME = config_local.USERNAME
