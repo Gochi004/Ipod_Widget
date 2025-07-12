@@ -29,3 +29,4 @@ jobs:
           git add ipodbase_updated.svg
           git commit -m "Update SVG with latest scrobble"
           git push
+
