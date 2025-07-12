@@ -1,13 +1,15 @@
 import pylast
 import requests
-from PIL import Image, ImageDraw, ImageFont
-from io import BytesIO
+import xml.etree.ElementTree as ET
 
-# Last.fm credentials
 API_KEY = "7c6d303ef29f29d821dfacd2552defa0"
 API_SECRET = "d95baa4faec4630ea6ec0226ce807916"
 USERNAME = "U773R1Y1NS4N3"
 PASSWORD_HASH = pylast.md5("Julio411#")
+
+ET.register_namespace('', "http://www.w3.org/2000/svg")
+ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
+ET.register_namespace('html', "http://www.w3.org/1999/xhtml")
 
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=USERNAME, password_hash=PASSWORD_HASH)
@@ -21,46 +23,91 @@ if recent_tracks:
     album = track.get_album()
     image_url = album.get_cover_image() if album else None
 
-    # Widget dimensions
-    W, H = 400, 600
-    bg = Image.new("RGB", (W, H), "#dadada")
-    draw = ImageDraw.Draw(bg)
+    tree = ET.parse("ipodbase.svg")
+    root = tree.getroot()
 
-    # iPod body
-    draw.rounded_rectangle((0, 0, W, H), radius=40, fill="#dadada")
+    root.attrib["width"] = "700"
+    root.attrib["height"] = "800"
+    root.attrib["viewBox"] = "0 0 700 800"
 
-    # Screen
-    screen_x, screen_y, screen_w, screen_h = 40, 40, 320, 180
-    draw.rounded_rectangle((screen_x, screen_y, screen_x + screen_w, screen_y + screen_h),
-                           radius=10, fill="#262626")
+    ns_svg = "http://www.w3.org/2000/svg"
+    ns_xlink = "http://www.w3.org/1999/xlink"
 
-    # Album cover inside screen
+    def remove_element(target, root):
+        for parent in root.iter():
+            for child in list(parent):
+                if child is target:
+                    parent.remove(child)
+                    return True
+        return False
+
+    for elem in root.iter("{http://www.w3.org/1999/xhtml}font"):
+        if "song" in (elem.text or ""):
+            elem.text = ""
+
+    clip_path = ET.Element(f"{{{ns_svg}}}clipPath", {"id": "clipText"})
+    clip_rect = ET.Element(f"{{{ns_svg}}}rect", {
+        "x": "54",
+        "y": "43",
+        "width": "280",
+        "height": "30",
+        "rx": "2.4",
+        "ry": "2.4"
+    })
+    clip_path.append(clip_rect)
+
+    defs = ET.Element(f"{{{ns_svg}}}defs")
+    defs.append(clip_path)
+    root.insert(0, defs)
+
+    base_speed = 0.35 
+    text_content = f"{title} - by {artist}"
+    text_length = len(text_content)
+    animation_duration = max(6, min(round(text_length * base_speed, 1), 30)) 
+
+    scroll_text = ET.Element(f"{{{ns_svg}}}text", {
+        "x": "340", 
+        "y": "63",  
+        "fill": "#e8e8e8",
+        "font-size": "16",
+        "font-family": "Verdana",
+        "font-weight": "bold",
+        "clip-path": "url(#clipText)"
+    })
+    scroll_text.text = text_content
+
+    animate_elem = ET.Element(f"{{{ns_svg}}}animate", {
+        "attributeName": "x",
+        "from": "340",
+        "to": "-400",
+        "dur": f"{animation_duration}s",
+        "repeatCount": "indefinite",
+        "fill": "remove",
+        "calcMode": "linear"
+    })
+    scroll_text.append(animate_elem)
+    root.append(scroll_text)
+
+  
     if image_url:
-        try:
-            response = requests.get(image_url)
-            cover = Image.open(BytesIO(response.content)).resize((140, 140))
-            bg.paste(cover, (screen_x + 10, screen_y + 20))
-        except Exception as e:
-            print("Error loading cover:", e)
+        image_elem = ET.Element(f"{{{ns_svg}}}image", {
+            f"{{{ns_xlink}}}href": image_url,
+            "x": "126.5",
+            "y": "89",
+            "width": "135",
+            "height": "135",
+            "preserveAspectRatio": "xMidYMid slice"
+        })
 
-    # Song text
-    font = ImageFont.load_default()
-    draw.text((screen_x + 160, screen_y + 30), title, font=font, fill="#ffffff")
-    draw.text((screen_x + 160, screen_y + 70), f"by {artist}", font=font, fill="#bbbbbb")
+        for i, elem in enumerate(root.findall(".//{http://www.w3.org/2000/svg}rect")):
+            if elem.attrib.get("x") == "126.5" and elem.attrib.get("y") == "89":
+                if remove_element(elem, root):
+                    root.insert(i, image_elem)
+                break
 
-    # Controls: circular base
-    ctrl_x, ctrl_y = W // 2 - 100, 270
-    draw.ellipse((ctrl_x, ctrl_y, ctrl_x + 200, ctrl_y + 200), fill="#ffffff")
 
-    # 🎛Button text and icons
-    draw.text((W // 2 - 20, ctrl_y + 20), "MENU", font=font, fill="#b4bcc5")  # Menu
-    draw.polygon([(W // 2 - 40, ctrl_y + 100), (W // 2 - 20, ctrl_y + 90), (W // 2 - 40, ctrl_y + 80)], fill="#b4bcc5")  # Prev
-    draw.polygon([(W // 2 + 40, ctrl_y + 80), (W // 2 + 20, ctrl_y + 90), (W // 2 + 40, ctrl_y + 100)], fill="#b4bcc5")  # Next
-    draw.polygon([(W // 2 - 10, ctrl_y + 160), (W // 2 - 10, ctrl_y + 180), (W // 2 + 10, ctrl_y + 170)], fill="#b4bcc5")  # Play
-
-    # Save
-    bg.save("ipod_widget_white.png")
-    print("Widget generado: ipod_widget_white.png")
+    tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
+    print("done'")
 
 else:
-    print("No hay scrobbles recientes.")
+    print("not done.")
