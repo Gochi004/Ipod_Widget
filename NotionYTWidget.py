@@ -3,15 +3,11 @@ import requests
 import xml.etree.ElementTree as ET
 import base64
 from datetime import datetime
-import config_local
 
-local_path = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(local_path)
-
-API_KEY = config_local.API_KEY
-API_SECRET = config_local.API_SECRET
-USERNAME = config_local.USERNAME
-PASSWORD_HASH = config_local.PASSWORD_HASH
+API_KEY = os.getenv("API_KEY")
+API_SECRET = os.getenv("API_SECRET")
+USERNAME = os.getenv("USERNAME")
+PASSWORD_HASH = pylast.md5(os.getenv("PASSWORD"))
 
 DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # Imagen por defecto
 
