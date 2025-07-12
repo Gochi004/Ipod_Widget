@@ -172,9 +172,6 @@ if recent_tracks:
         f.write(html_content)
     print(f"index.html generado con versión: {version}")
 
-    with open("version.txt", "w", encoding="utf-8") as vf:
-        vf.write(version)
-
 else:
     print("No hay scrobbles recientes.")
 
