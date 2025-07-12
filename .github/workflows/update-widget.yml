@@ -4,6 +4,9 @@ on:
   repository_dispatch:
     types: [new_scrobble]
 
+permissions:
+  contents: write 
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -20,21 +23,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pylast
 
-      - name: Install dependencies
-        run: pip install pylast requests
-
-      - name: Run SVG generator
+      - name: Ejecutar script
         run: python NotionYTWidget.py
 
-      - name: Commit and push updated SVG
+      - name: Commit y push de cambios
         run: |
-          git config user.name "Auto Updater"
-          git config user.email "bot@example.com"
-          git add ipodbase_updated.svg index.html
-          git commit -m "Update SVG with latest scrobble"
+          git config --global user.name "Gochi Bot"
+          git config --global user.email "gochi@example.com"
+          git add ipodbase_updated.svg index.html .nojekyll
+          git commit -m "🔄 Actualización automática del widget con nuevo scrobble" || echo "Nada que commitear"
           git push
