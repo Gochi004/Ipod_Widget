@@ -22,9 +22,24 @@
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }
   </style>
+  <script>
+    let lastVersion = null;
+
+    async function checkForUpdate() {
+      const res = await fetch('version.txt?_=' + new Date().getTime());
+      const newVersion = await res.text();
+
+      if (lastVersion && newVersion.trim() !== lastVersion.trim()) {
+        window.location.reload(true);
+      }
+      lastVersion = newVersion.trim();
+    }
+
+    setInterval(checkForUpdate, 30000);
+  </script>
 </head>
 <body>
-  <object type="image/svg+xml" data="ipodbase_updated.svg?v=202507120527" width="641" height="292">
+  <object type="image/svg+xml" data="ipodbase_updated.svg?v=202507120531" width="641" height="292">
     No se pudo cargar el widget
   </object>
 </body>
