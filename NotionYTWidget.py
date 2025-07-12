@@ -8,7 +8,8 @@ API_SECRET = "d95baa4faec4630ea6ec0226ce807916"
 USERNAME = "U773R1Y1NS4N3"
 PASSWORD_HASH = pylast.md5("Julio411#")
 
-# 🌐 Namespaces SVG
+DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # imagen por defecto
+
 ET.register_namespace('', "http://www.w3.org/2000/svg")
 ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 ET.register_namespace('html', "http://www.w3.org/1999/xhtml")
@@ -20,15 +21,32 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
 recent_tracks = network.get_user(USERNAME).get_recent_tracks(limit=1)
 
 if recent_tracks:
-    track = recent_tracks[0].track
+    track_info = recent_tracks[0]
+    track = track_info.track
     title = track.title
     artist = track.artist.name
+    album_name = track_info.album
+    image_url = None
+
     album = track.get_album()
-    image_url = album.get_cover_image() if album else None
+    if album:
+        try:
+            image_url = album.get_cover_image(size=pylast.SIZE_LARGE)
+        except:
+            pass
+
+    if not image_url and album_name:
+        try:
+            album_obj = network.get_album(artist, album_name)
+            image_url = album_obj.get_cover_image(size=pylast.SIZE_LARGE)
+        except:
+            pass
+
+    if not image_url:
+        image_url = DEFAULT_COVER
 
     tree = ET.parse("ipodbase.svg")
     root = tree.getroot()
-
     root.attrib["width"] = "641"
     root.attrib["height"] = "292"
     root.attrib["viewBox"] = "0 0 641 292"
@@ -40,7 +58,6 @@ if recent_tracks:
                     parent.remove(child)
                     return True
         return False
-
 
     for elem in root.iter("{http://www.w3.org/1999/xhtml}font"):
         if "song" in (elem.text or ""):
@@ -83,34 +100,33 @@ if recent_tracks:
     scroll_text.append(animate_elem)
     root.append(scroll_text)
 
-    if image_url:
-        try:
-            response = requests.get(image_url)
-            if response.status_code == 200:
-                image_data = response.content
-                mime_type = response.headers.get("Content-Type", "image/jpeg")
-                base64_str = base64.b64encode(image_data).decode("utf-8")
+    try:
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            image_data = response.content
+            mime_type = response.headers.get("Content-Type", "image/jpeg")
+            base64_str = base64.b64encode(image_data).decode("utf-8")
 
-                image_elem = ET.Element(f"{{{ns_svg}}}image", {
-                    f"{{{ns_xlink}}}href": f"data:{mime_type};base64,{base64_str}",
-                    "x": "126.5", "y": "89",
-                    "width": "135", "height": "135",
-                    "preserveAspectRatio": "xMidYMid slice"
-                })
+            image_elem = ET.Element(f"{{{ns_svg}}}image", {
+                f"{{{ns_xlink}}}href": f"data:{mime_type};base64,{base64_str}",
+                "x": "126.5", "y": "89",
+                "width": "135",
+                "height": "135",
+                "preserveAspectRatio": "xMidYMid slice"
+            })
 
-                for i, elem in enumerate(root.findall(".//{http://www.w3.org/2000/svg}rect")):
-                    if elem.attrib.get("x") == "126.5" and elem.attrib.get("y") == "89":
-                        if remove_element(elem, root):
-                            root.insert(i, image_elem)
-                        break
-            else:
-                print("Falló la descarga del cover del álbum.")
-        except Exception as e:
-            print("Error al descargar la imagen:", e)
+            for i, elem in enumerate(root.findall(".//{http://www.w3.org/2000/svg}rect")):
+                if elem.attrib.get("x") == "126.5" and elem.attrib.get("y") == "89":
+                    if remove_element(elem, root):
+                        root.insert(i, image_elem)
+                    break
+        else:
+            print("⚠️ No se pudo obtener el cover.")
+    except Exception as e:
+        print("❌ Error al descargar el cover:", e)
 
-    # 📤 Guardar SVG actualizado
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
-    print("SVG actualizado con el último scrobble")
+    print("✅ SVG actualizado con el último scrobble")
 
 else:
-    print("No hay scrobbles recientes.")
+    print("⛔ No hay scrobbles recientes.")
