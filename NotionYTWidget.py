@@ -96,7 +96,7 @@ if recent_tracks:
         "x": "340", "y": "63",
         "fill": "#e8e8e8",
         "font-size": "16",
-        "font-family": "Noto Sans JP",
+        "font-family": "Verdana, 'Noto Sans JP', sans-serif",
         "font-weight": "bold",
         "clip-path": "url(#clipText)"
     })
