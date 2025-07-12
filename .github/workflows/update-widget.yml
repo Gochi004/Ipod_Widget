@@ -12,6 +12,10 @@ jobs:
       LC_ALL: C.UTF-8
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: 1
+      API_KEY: ${{ secrets.API_KEY }}
+      API_SECRET: ${{ secrets.API_SECRET }}
+      USERNAME: ${{ secrets.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
