@@ -2,14 +2,17 @@ import pylast
 import requests
 import xml.etree.ElementTree as ET
 import base64
+from datetime import datetime
 
+# 🔑 Last.fm API config
 API_KEY = "7c6d303ef29f29d821dfacd2552defa0"
 API_SECRET = "d95baa4faec4630ea6ec0226ce807916"
 USERNAME = "U773R1Y1NS4N3"
 PASSWORD_HASH = pylast.md5("Julio411#")
 
-DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # imagen por defecto
+DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"  # Imagen por defecto si falla el cover
 
+# 🌐 Namespaces
 ET.register_namespace('', "http://www.w3.org/2000/svg")
 ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 ET.register_namespace('html', "http://www.w3.org/1999/xhtml")
@@ -28,6 +31,7 @@ if recent_tracks:
     album_name = track_info.album
     image_url = None
 
+    # 🧠 Obtener carátula robustamente
     album = track.get_album()
     if album:
         try:
@@ -45,6 +49,7 @@ if recent_tracks:
     if not image_url:
         image_url = DEFAULT_COVER
 
+    # 🎨 Cargar y editar SVG base
     tree = ET.parse("ipodbase.svg")
     root = tree.getroot()
     root.attrib["width"] = "641"
@@ -73,6 +78,7 @@ if recent_tracks:
     defs.append(clip_path)
     root.insert(0, defs)
 
+    # 📝 Texto con animación scroll
     base_speed = 0.35
     text_content = f"{title} - by {artist}"
     text_length = len(text_content)
@@ -100,6 +106,7 @@ if recent_tracks:
     scroll_text.append(animate_elem)
     root.append(scroll_text)
 
+    # 🖼️ Insertar carátula embebida
     try:
         response = requests.get(image_url)
         if response.status_code == 200:
@@ -121,12 +128,48 @@ if recent_tracks:
                         root.insert(i, image_elem)
                     break
         else:
-            print("⚠️ No se pudo obtener el cover.")
+            print("⚠️ No se pudo descargar el cover.")
     except Exception as e:
-        print("❌ Error al descargar el cover:", e)
+        print("❌ Error al obtener la imagen:", e)
 
+    # 💾 Guardar SVG actualizado
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
     print("✅ SVG actualizado con el último scrobble")
+
+    # 🧾 Generar index.html con versionado dinámico
+    version = datetime.now().strftime("%Y%m%d%H%M")
+    html_content = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi iPod Widget</title>
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  <meta http-equiv="pragma" content="no-cache">
+  <style>
+    body {{
+      background-color: #0f0f0f;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }}
+    object {{
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }}
+  </style>
+</head>
+<body>
+  <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}" width="700" height="800">
+    No se pudo cargar el widget
+  </object>
+</body>
+</html>
+"""
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
+    print("📝 index.html generado con versión:", version)
 
 else:
     print("⛔ No hay scrobbles recientes.")
