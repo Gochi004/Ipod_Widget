@@ -143,9 +143,10 @@ if recent_tracks:
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="refresh" content="30">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <style>
-    body {{
+    body {
       background-color: white;
       margin: 0;
       padding: 0;
@@ -154,29 +155,14 @@ if recent_tracks:
       justify-content: center;
       height: 100vh;
       font-family: 'Noto Sans JP', sans-serif;
-    }}
-    object {{
+    }
+    object {
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    }}
+    }
   </style>
-  <script>
-    let lastVersion = null;
-
-    async function checkForUpdate() {{
-      const res = await fetch('version.txt?_=' + new Date().getTime());
-      const newVersion = await res.text();
-
-      if (lastVersion && newVersion.trim() !== lastVersion.trim()) {{
-        window.location.reload(true);
-      }}
-      lastVersion = newVersion.trim();
-    }}
-
-    setInterval(checkForUpdate, 30000);
-  </script>
 </head>
 <body>
-  <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}" width="641" height="292">
+  <object type="image/svg+xml" data="ipodbase_updated.svg?v=202507120140" width="641" height="292">
     No se pudo cargar el widget
   </object>
 </body>
