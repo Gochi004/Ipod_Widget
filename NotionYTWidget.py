@@ -134,8 +134,8 @@ if recent_tracks:
     print(f"SVG actualizado con: {text_content}")
 
     # Crear index.html con Google Fonts y auto-reload si cambia versión
-    version = datetime.now().strftime("%Y%m%d%H%M")
-    html_content = f"""<!DOCTYPE html>
+version = datetime.now().strftime("%Y%m%d%H%M")
+html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -146,7 +146,7 @@ if recent_tracks:
   <meta http-equiv="refresh" content="30">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <style>
-    body {
+    body {{
       background-color: white;
       margin: 0;
       padding: 0;
@@ -155,19 +155,20 @@ if recent_tracks:
       justify-content: center;
       height: 100vh;
       font-family: 'Noto Sans JP', sans-serif;
-    }
-    object {
+    }}
+    object {{
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    }
+    }}
   </style>
 </head>
 <body>
-  <object type="image/svg+xml" data="ipodbase_updated.svg?v=202507120140" width="641" height="292">
+  <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}" width="641" height="292">
     No se pudo cargar el widget
   </object>
 </body>
 </html>
 """
+
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"index.html generado con versión: {version}")
