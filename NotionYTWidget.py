@@ -141,7 +141,7 @@ if now_playing:
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   <meta http-equiv="pragma" content="no-cache">
-  <meta http-equiv="refresh" content="30">
+  <meta http-equiv="refresh" content="60">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <style>
     body {{
@@ -163,12 +163,21 @@ if now_playing:
   </style>
 </head>
 <body>
-  <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}">
+  <object id="ipod-player" type="image/svg+xml"
+          data="ipodbase_updated.svg?v={version}">
     No se pudo cargar el widget
   </object>
+
+  <script>
+    setInterval(() => {{
+      const obj = document.getElementById("ipod-player");
+      obj.data = "ipodbase_updated.svg?v=" + Date.now();
+    }}, 30000);  // refresh every 30 seconds
+  </script>
 </body>
 </html>
 """
+
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"index.html generado con versión: {version}")
