@@ -62,29 +62,26 @@ def load_last_scrobble():
             return f.read().strip()
     return ""
 
-# 💾 Save current track to file
-def save_current_scrobble(entry):
-    with open(LAST_SCROBBLE_FILE, "w", encoding="utf-8") as f:
-        f.write(entry)
+for _ in range(3):
+    try:
+        now_playing = network.get_user(USERNAME).get_now_playing()
+        if now_playing:
+            current_title = now_playing.title.strip()
+            current_artist = now_playing.artist.name.strip()
+            current_scrobble = f"{current_title}||{current_artist}"
+            previous_scrobble = load_last_scrobble()
 
-# 🕰️ One-shot scrobble check
-try:
-    now_playing = network.get_user(USERNAME).get_now_playing()
-    if now_playing:
-        current_title = now_playing.title.strip()
-        current_artist = now_playing.artist.name.strip()
-        current_scrobble = f"{current_title}||{current_artist}"
-        previous_scrobble = load_last_scrobble()
-
-        if current_scrobble != previous_scrobble:
-            safe_console(f"🎵 Nuevo tema detectado: {current_title} — {current_artist}")
-            log_scrobble(current_scrobble)
-            save_current_scrobble(current_scrobble)
-            send_webhook()
+            if current_scrobble != previous_scrobble:
+                safe_console(f"🎵 Nuevo tema detectado: {current_title} — {current_artist}")
+                log_scrobble(current_scrobble)
+                save_current_scrobble(current_scrobble)
+                send_webhook()
+            else:
+                safe_console("🔁 Mismo tema — no se envía webhook")
         else:
-            safe_console("🔁 Mismo tema — no se envía webhook")
-    else:
-        safe_console("🛑 No hay música en reproducción")
-except Exception as e:
-    safe_console(f"💥 Error: {e}")
+            safe_console("🛑 No hay música en reproducción")
+    except Exception as e:
+        safe_console(f"💥 Error: {e}")
+
+    time.sleep(20)  # Wait ~20 seconds before next check
 
