@@ -8,10 +8,10 @@ try:
 except:
     pass
 
-API_KEY = ""
-API_SECRET = ""
-USERNAME = ""
-PASSWORD_HASH = pylast.md5("")
+API_KEY = "API_KEY"
+API_SECRET = "API_SECRET"
+USERNAME = "USERNAME"
+PASSWORD_HASH = pylast.md5("PASSWORD")
 
 WEBHOOK_URL = "https://api.github.com/repos/Gochi004/Gochi004/dispatches"
 GITHUB_TOKEN = ""  # reemplaza por el real
