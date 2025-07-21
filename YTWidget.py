@@ -11,43 +11,40 @@ USERNAME = os.getenv("USERNAME")
 PASSWORD_HASH = pylast.md5(os.getenv("PASSWORD"))
 DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"
 
-# Namespaces SVG
 ET.register_namespace('', "http://www.w3.org/2000/svg")
 ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 ET.register_namespace('html', "http://www.w3.org/1999/xhtml")
 ns_svg = "http://www.w3.org/2000/svg"
 ns_xlink = "http://www.w3.org/1999/xlink"
 
-# Conexión a Last.fm
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=USERNAME, password_hash=PASSWORD_HASH)
-recent_tracks = network.get_user(USERNAME).get_recent_tracks(limit=1)
+now_playing = network.get_user(USERNAME).get_now_playing()
 
-if recent_tracks:
-    track_info = recent_tracks[0]
-    track = track_info.track
+if now_playing:
+    track = now_playing
     title = track.title
     artist = track.artist.name
-    album_name = track_info.album
+    album_obj = track.get_album()
+    album_name = album_obj.get_name() if album_obj else None
     image_url = None
 
-    # Buscar carátula
-    album = track.get_album()
-    if album:
+    if album_obj:
         try:
-            image_url = album.get_cover_image(size=pylast.SIZE_LARGE)
-        except:
-            pass
-    if not image_url and album_name:
-        try:
-            album_obj = network.get_album(artist, album_name)
             image_url = album_obj.get_cover_image(size=pylast.SIZE_LARGE)
         except:
             pass
+
+    if not image_url and album_name:
+        try:
+            album_alt = network.get_album(artist, album_name)
+            image_url = album_alt.get_cover_image(size=pylast.SIZE_LARGE)
+        except:
+            pass
+
     if not image_url:
         image_url = DEFAULT_COVER
 
-    # Procesar SVG base
     tree = ET.parse("ipodbase.svg")
     root = tree.getroot()
     root.attrib["width"] = "641"
@@ -76,9 +73,8 @@ if recent_tracks:
     defs.append(clip_path)
     root.insert(0, defs)
 
-    # Texto animado
     base_speed = 0.35
-    text_content = f"{title} - by {artist}"
+    text_content = f"Now Playing: {title} - by {artist}"
     animation_duration = max(6, min(round(len(text_content) * base_speed, 1), 30))
 
     scroll_text = ET.Element(f"{{{ns_svg}}}text", {
@@ -103,7 +99,6 @@ if recent_tracks:
     scroll_text.append(animate_elem)
     root.append(scroll_text)
 
-    # Insertar carátula
     try:
         response = requests.get(image_url)
         if response.status_code == 200:
@@ -124,17 +119,12 @@ if recent_tracks:
                     if remove_element(elem, root):
                         root.insert(i, image_elem)
                     break
-        else:
-            print("No se pudo descargar la carátula.")
     except Exception as e:
         print(f"Error al obtener la imagen: {e}")
 
-if recent_tracks:
-    # Guardar SVG actualizado
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
     print(f"SVG actualizado con: {text_content}")
 
-    # Crear index.html con cache busting y auto-reload
     version = datetime.now().strftime("%Y%m%d%H%M")
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
@@ -169,10 +159,9 @@ if recent_tracks:
 </body>
 </html>
 """
-
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"index.html generado con versión: {version}")
 
 else:
-    print("No hay scrobbles recientes.")
+    print("🎵 No hay música reproduciéndose en este momento.")
