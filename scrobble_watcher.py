@@ -14,7 +14,7 @@ USERNAME = "USERNAME"
 PASSWORD_HASH = pylast.md5("PASSWORD")
 
 WEBHOOK_URL = "https://api.github.com/repos/Gochi004/Gochi004/dispatches"
-GITHUB_TOKEN = ""  # reemplaza por el real
+GITHUB_TOKEN = "GH_TK"  # reemplaza por el real
 LAST_SCROBBLE_FILE = "last_scrobble.txt"
 
 network = pylast.LastFMNetwork(
