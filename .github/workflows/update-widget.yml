@@ -2,7 +2,7 @@ name: Update SVG Widget
 
 on:
   repository_dispatch:
-    types: [new_scrobble]
+    types: [new_scrobble]  
 
 permissions:
   contents: write 
@@ -10,6 +10,7 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+
     env:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
@@ -19,25 +20,27 @@ jobs:
       API_SECRET: ${{ secrets.API_SECRET }}
       USERNAME: ${{ secrets.USERNAME }}
       PASSWORD: ${{ secrets.PASSWORD }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests pylast
 
-      - name: Crear archivo .nojekyll
+      - name: Create .nojekyll file (for GitHub Pages)
         run: touch .nojekyll
 
-      - name: Ejecutar script
+      - name: Run scrobble widget script
         run: python NotionYTWidget.py
 
-      - name: Commit y push de cambios
+      - name: Commit and push updates with GH_TK token
         run: |
           git config --global user.name "Gochi Bot"
           git config --global user.email "gochi@example.com"
+          git remote set-url origin https://gochi004:${{ secrets.GH_TK }}@github.com/gochi004/Ipod_Widget.git
           git add ipodbase_updated.svg index.html .nojekyll
-          git commit -m "🔄 Actualización automática del widget con nuevo scrobble" || echo "Nada que commitear"
-          git push
+          git commit -m "Actualización automática del widget con nuevo scrobble" || echo "Nada que commitear"
+          git push origin main
