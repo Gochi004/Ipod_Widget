@@ -5,18 +5,21 @@ import base64
 import os
 from datetime import datetime
 
+# 🔐 Configuración
 API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
 USERNAME = os.getenv("USERNAME")
 PASSWORD_HASH = pylast.md5(os.getenv("PASSWORD"))
 DEFAULT_COVER = "https://i.imgur.com/wt3P9ol.jpg"
 
+# 🖌️ Namespaces SVG
 ET.register_namespace('', "http://www.w3.org/2000/svg")
 ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 ET.register_namespace('html', "http://www.w3.org/1999/xhtml")
 ns_svg = "http://www.w3.org/2000/svg"
 ns_xlink = "http://www.w3.org/1999/xlink"
 
+# 🎵 Última canción en reproducción
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=USERNAME, password_hash=PASSWORD_HASH)
 now_playing = network.get_user(USERNAME).get_now_playing()
@@ -29,22 +32,22 @@ if now_playing:
     album_name = album_obj.get_name() if album_obj else None
     image_url = None
 
+    # 🖼️ Obtener imagen del álbum
     if album_obj:
         try:
             image_url = album_obj.get_cover_image(size=pylast.SIZE_LARGE)
         except:
             pass
-
     if not image_url and album_name:
         try:
             album_alt = network.get_album(artist, album_name)
             image_url = album_alt.get_cover_image(size=pylast.SIZE_LARGE)
         except:
             pass
-
     if not image_url:
         image_url = DEFAULT_COVER
 
+    # 🧠 Cargar y modificar SVG base
     tree = ET.parse("ipodbase.svg")
     root = tree.getroot()
     root.attrib["width"] = "641"
@@ -73,6 +76,7 @@ if now_playing:
     defs.append(clip_path)
     root.insert(0, defs)
 
+    # 🏃 Texto desplazable
     base_speed = 0.35
     text_content = f"Now Playing: {title} - by {artist}"
     animation_duration = max(6, min(round(len(text_content) * base_speed, 1), 30))
@@ -99,6 +103,7 @@ if now_playing:
     scroll_text.append(animate_elem)
     root.append(scroll_text)
 
+    # 🎨 Insertar carátula del álbum
     try:
         response = requests.get(image_url)
         if response.status_code == 200:
@@ -122,9 +127,11 @@ if now_playing:
     except Exception as e:
         print(f"Error al obtener la imagen: {e}")
 
+    # 💾 Guardar SVG
     tree.write("ipodbase_updated.svg", encoding="utf-8", xml_declaration=True)
     print(f"SVG actualizado con: {text_content}")
 
+    # 🌐 Generar index.html con fondo pastel y tamaño compacto
     version = datetime.now().strftime("%Y%m%d%H%M")
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
@@ -138,7 +145,7 @@ if now_playing:
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <style>
     body {{
-      background-color: white;
+      background-color: #F7F0F3;
       margin: 0;
       padding: 0;
       display: flex;
@@ -148,12 +155,15 @@ if now_playing:
       font-family: 'Noto Sans JP', sans-serif;
     }}
     object {{
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      width: 520px;
+      height: 240px;
+      border-radius: 12px;
     }}
   </style>
 </head>
 <body>
-  <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}" width="641" height="292">
+  <object type="image/svg+xml" data="ipodbase_updated.svg?v={version}">
     No se pudo cargar el widget
   </object>
 </body>
@@ -165,3 +175,4 @@ if now_playing:
 
 else:
     print("🎵 No hay música reproduciéndose en este momento.")
+
