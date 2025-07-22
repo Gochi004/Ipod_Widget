@@ -145,7 +145,7 @@ if now_playing:
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
   <style>
     body {{
-      background-color: #F7F0F3;
+      background-color: #ffffff;
       margin: 0;
       padding: 0;
       display: flex;
